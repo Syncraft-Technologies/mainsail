@@ -1,79 +1,106 @@
 <template>
     <div>
         <v-row v-if="isMobile">
-            <v-col>
+           <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
+                <webcam-panel></webcam-panel>
+            </v-col>
+
+            <v-col class="col-12 col-md-12 pb-0 pb-md-3">                
                 <status-panel></status-panel>
-                <template v-for="component in mobileLayout">
-                    <component
-                        :is="extractPanelName(component.name)"
-                        :key="'dashboard-mobileLayout-' + component.name"
-                        :panel-id="extractPanelId(component.name)"></component>
-                </template>
+            </v-col>
+           
+            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
+                <temperature-panel></temperature-panel>
+            </v-col>
+
+            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
+                <toolhead-control-panel></toolhead-control-panel>
+            </v-col>
+
+            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
+                <extruder-control-panel></extruder-control-panel>
+            </v-col>
+
+            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
+                <miscellaneous-panel></miscellaneous-panel>
             </v-col>
         </v-row>
+        
         <v-row v-else-if="isTablet">
-            <v-col class="col-6">
-                <status-panel></status-panel>
-                <template v-for="component in tabletLayout1">
-                    <component
-                        :is="extractPanelName(component.name)"
-                        :key="'dashboard-tabletLayout1-' + component.name"
-                        :panel-id="extractPanelId(component.name)"></component>
-                </template>
+            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
+                <webcam-panel></webcam-panel>
             </v-col>
-            <v-col class="col-6">
-                <template v-for="component in tabletLayout2">
-                    <component
-                        :is="extractPanelName(component.name)"
-                        :key="'dashboard-tabletLayout2-' + component.name"
-                        :panel-id="extractPanelId(component.name)"></component>
-                </template>
+
+            <v-col class="col-12 col-md-12 pb-0 pb-md-3">                
+                <status-panel></status-panel>
+            </v-col>
+           
+            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
+                <temperature-panel></temperature-panel>
+            </v-col>
+
+            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
+                <toolhead-control-panel></toolhead-control-panel>
+            </v-col>
+
+            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
+                <extruder-control-panel></extruder-control-panel>
+            </v-col>
+
+            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
+                <miscellaneous-panel></miscellaneous-panel>
             </v-col>
         </v-row>
+
         <v-row v-else-if="isDesktop">
-            <v-col class="col-5">
-                <status-panel></status-panel>
-                <template v-for="component in desktopLayout1">
-                    <component
-                        :is="extractPanelName(component.name)"
-                        :key="'dashboard-desktopLayout1-' + component.name"
-                        :panel-id="extractPanelId(component.name)"></component>
-                </template>
+            <v-col class="col-6 col-md-6 pb-0 pb-md-3"> 
+                <webcam-panel></webcam-panel>
             </v-col>
-            <v-col class="col-7">
-                <template v-for="component in desktopLayout2">
-                    <component
-                        :is="extractPanelName(component.name)"
-                        :key="'dashboard-desktopLayout2-' + component.name"
-                        :panel-id="extractPanelId(component.name)"></component>
-                </template>
+
+            <v-col class="col-6 col-md-6 pb-0 pb-md-3">                
+                <status-panel></status-panel>
+            </v-col>
+           
+            <v-col class="col-6 col-md-6 pb-0 pb-md-3"> 
+                <temperature-panel></temperature-panel>
+            </v-col>
+
+            <v-col class="col-6 col-md-6 pb-0 pb-md-3"> 
+                <toolhead-control-panel></toolhead-control-panel>
+            </v-col>
+
+            <v-col class="col-6 col-md-6 pb-0 pb-md-3"> 
+                <extruder-control-panel></extruder-control-panel>
+            </v-col>
+
+            <v-col class="col-6 col-md-6 pb-0 pb-md-3"> 
+                <miscellaneous-panel></miscellaneous-panel>
             </v-col>
         </v-row>
         <v-row v-else-if="isWidescreen">
-            <v-col class="col-3">
+            
+            <v-col class="col-4 col-md-4 pb-0 pb-md-3"> 
+                <webcam-panel></webcam-panel>
+            </v-col>
+
+            <v-col class="col-4 col-md-4 pb-0 pb-md-3">                
                 <status-panel></status-panel>
-                <template v-for="component in widescreenLayout1">
-                    <component
-                        :is="extractPanelName(component.name)"
-                        :key="'dashboard-desktopLayout1-' + component.name"
-                        :panel-id="extractPanelId(component.name)"></component>
-                </template>
             </v-col>
-            <v-col class="col-5">
-                <template v-for="component in widescreenLayout2">
-                    <component
-                        :is="extractPanelName(component.name)"
-                        :key="'dashboard-desktopLayout2-' + component.name"
-                        :panel-id="extractPanelId(component.name)"></component>
-                </template>
+           
+            <v-col class="col-4 col-md-4 pb-0 pb-md-3"> 
+                <temperature-panel></temperature-panel>
             </v-col>
-            <v-col class="col-4">
-                <template v-for="component in widescreenLayout3">
-                    <component
-                        :is="extractPanelName(component.name)"
-                        :key="'dashboard-desktopLayout3-' + component.name"
-                        :panel-id="extractPanelId(component.name)"></component>
-                </template>
+
+            <v-col class="col-4 col-md-4 pb-0 pb-md-3"> 
+                <toolhead-control-panel></toolhead-control-panel>
+            </v-col>
+
+            <v-col class="col-4 col-md-4 pb-0 pb-md-3"> 
+                <extruder-control-panel></extruder-control-panel>
+            </v-col>
+
+            <v-col class="col-4 col-md-4 pb-0 pb-md-3"> 
+                <miscellaneous-panel></miscellaneous-panel>
             </v-col>
         </v-row>
     </div>
@@ -103,8 +130,6 @@ import WebcamPanel from '@/components/panels/WebcamPanel.vue'
         KlippyStatePanel,
         MachineSettingsPanel,
         MacrogroupPanel,
-        // MacrosPanel,
-        // MiniconsolePanel,
         MinSettingsPanel,
         MiscellaneousPanel,
         SpoolmanPanel,
