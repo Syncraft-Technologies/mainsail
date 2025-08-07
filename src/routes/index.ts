@@ -18,7 +18,11 @@ import {
     mdiHistory,
     mdiTimelapse,
     mdiWrench,
+    mdiUpdate,
+    mdiArrowDownCircleOutline,
+    mdiCogOutline,
 } from '@mdi/js'
+import UpdatePage from '@/components/panels/UpdatePage/UpdatePage.vue'
 
 const routes: AppRoute[] = [
     {
@@ -120,13 +124,25 @@ const routes: AppRoute[] = [
     {
         name: 'machine',
         title: 'Machine',
-        path: '/config',
-        icon: mdiWrench,
+        path: '/machine',
+        icon: mdiCogOutline,
         component: Machine,
         alwaysShow: true,
         showInNavi: true,
         position: 90,
     },
+
+    {
+        name: 'update',
+        title: 'Update',
+        path: '/update',
+        icon: mdiArrowDownCircleOutline,
+        component: UpdatePage,
+        alwaysShow: true,
+        showInNavi: true,
+        position: 100,
+    },
+
     {
         title: null,
         component: null,

@@ -730,10 +730,11 @@
         "G-Code Viewer": "Visualizador GCODE",
         "Heightmap": "Calibração",
         "History": "Histórico",
-        "Machine": "Configurações",
+        "Machine": "Equipamento",
         "Printers": "Impressoras",
         "Timelapse": "Lapso de tempo",
-        "Webcam": "Webcam"
+        "Webcam": "Webcam",
+        "Update": "Update"
     },
     "ScrewsTiltAdjust": {
         "Accept": "Aceitar",
