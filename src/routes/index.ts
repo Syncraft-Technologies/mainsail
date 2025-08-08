@@ -1,4 +1,5 @@
 import Dashboard from '../pages/Dashboard.vue'
+import Calibration from '../pages/Calibration.vue'
 import Webcam from '../pages/Webcam.vue'
 import Farm from '../pages/Farm.vue'
 import Console from '../pages/Console.vue'
@@ -21,8 +22,10 @@ import {
     mdiUpdate,
     mdiArrowDownCircleOutline,
     mdiCogOutline,
+    mdiAbacus,
 } from '@mdi/js'
 import UpdatePage from '@/components/panels/UpdatePage/UpdatePage.vue'
+// import Calibration from '@/components/panels/Calibration/Calibration.vue'
 
 const routes: AppRoute[] = [
     {
@@ -65,18 +68,7 @@ const routes: AppRoute[] = [
         klipperIsConnected: true,
         position: 30,
     },
-    {
-        name: 'heightmap',
-        title: 'Heightmap',
-        path: '/heightmap',
-        icon: mdiGrid,
-        component: () => import('../pages/Heightmap.vue'),
-        alwaysShow: false,
-        showInNavi: true,
-        klipperComponent: 'bed_mesh',
-        position: 40,
-    },
-    {
+      {
         name: 'gcodefiles',
         title: 'G-Code Files',
         path: '/files',
@@ -85,7 +77,7 @@ const routes: AppRoute[] = [
         alwaysShow: true,
         showInNavi: true,
         registeredDirectory: 'gcodes',
-        position: 50,
+        position: 40,
         fullscreen: true,
     },
     {
@@ -96,8 +88,19 @@ const routes: AppRoute[] = [
         component: () => import('../pages/Viewer.vue'),
         alwaysShow: true,
         showInNavi: true,
-        position: 60,
+        position: 50,
         fullscreen: true,
+    },
+    {
+        name: 'heightmap',
+        title: 'Heightmap',
+        path: '/heightmap',
+        icon: mdiGrid,
+        component: () => import('../pages/Heightmap.vue'),
+        alwaysShow: false,
+        showInNavi: true,
+        klipperComponent: 'bed_mesh',
+        position: 60,
     },
     {
         name: 'history',
@@ -122,6 +125,16 @@ const routes: AppRoute[] = [
         position: 80,
     },
     {
+        name: 'calibration',
+        title: 'Calibration',
+        path: '/calibration',
+        icon: mdiAbacus,
+        component: Calibration,
+        alwaysShow: true,
+        showInNavi: true,
+        position: 90,
+    },
+    {
         name: 'machine',
         title: 'Machine',
         path: '/machine',
@@ -129,9 +142,8 @@ const routes: AppRoute[] = [
         component: Machine,
         alwaysShow: true,
         showInNavi: true,
-        position: 90,
+        position: 100,
     },
-
     {
         name: 'update',
         title: 'Update',
@@ -140,9 +152,8 @@ const routes: AppRoute[] = [
         component: UpdatePage,
         alwaysShow: true,
         showInNavi: true,
-        position: 100,
+        position: 110,
     },
-
     {
         title: null,
         component: null,
