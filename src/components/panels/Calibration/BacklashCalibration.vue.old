@@ -88,11 +88,11 @@
         ></confirmation-dialog>
 
         <!-- Snackbar de Notificações -->
-        <!-- <notification-snackbar
+        <notification-snackbar
             v-model="notification.show"
             :message="notification.message"
             :color="notification.color"
-        ></notification-snackbar> -->
+        ></notification-snackbar>
     </v-container>
 </template>
 

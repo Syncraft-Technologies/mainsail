@@ -1,0 +1,81 @@
+{
+  "printerTypes": [
+    {
+      "id": "X1",
+      "name": "X1 Standard",
+      "description": "Impressora padrão com um único extrusor",
+      "axes": ["X", "Y"],
+      "defaultBacklash": {
+        "x": 0.10,
+        "y": 0.10
+      },
+      "limits": {
+        "min": 0.0,
+        "max": 2.0,
+        "step": 0.01
+      },
+      "calibrationFiles": {
+        "x": "calibration_x_standard.gcode",
+        "y": "calibration_y_standard.gcode"
+      },
+      "commands": {
+        "setBacklash": "SET_BACKLASH_COMPENSATION AXIS={axis} DISTANCE={value}",
+        "printCalibrationX": "PRINT_CALIBRATION_X",
+        "printCalibrationY": "PRINT_CALIBRATION_Y"
+      }
+    },
+    {
+      "id": "IDEX", 
+      "name": "IDEX Dual Extruder",
+      "description": "Sistema de duplo extrusor independente",
+      "axes": ["X", "Y"],
+      "extruders": 2,
+      "defaultBacklash": {
+        "extruder0": {
+          "x": 0.15,
+          "y": 0.12
+        },
+        "extruder1": {
+          "x": 0.18,
+          "y": 0.14
+        }
+      },
+      "limits": {
+        "min": 0.0,
+        "max": 2.0,
+        "step": 0.01
+      },
+      "calibrationFiles": {
+        "x": "calibration_x_idex.gcode",
+        "y": "calibration_y_idex.gcode"
+      },
+      "commands": {
+        "setBacklash": "SET_BACKLASH_COMPENSATION EXTRUDER={extruder} AXIS={axis} DISTANCE={value}",
+        "printCalibrationX": "PRINT_CALIBRATION_X_IDEX",
+        "printCalibrationY": "PRINT_CALIBRATION_Y_IDEX"
+      }
+    }
+  ],
+  "systemCommands": {
+    "firmwareRestart": "FIRMWARE_RESTART",
+    "saveConfig": "SAVE_CONFIG",
+    "emergencyStop": "M112"
+  },
+  "calibrationSettings": {
+    "timeoutSeconds": 30,
+    "retryAttempts": 3,
+    "temperatureCheck": true,
+    "homeBeforePrint": true
+  },
+  "notifications": {
+    "timeout": 4000,
+    "position": "bottom-right",
+    "maxVisible": 3
+  },
+  "ui": {
+    "theme": "dark",
+    "compactMode": false,
+    "showTooltips": true,
+    "animationSpeed": "normal"
+  }
+}

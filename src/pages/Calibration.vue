@@ -1,27 +1,7 @@
 <template>
-    <div>
-        <v-row v-if="isMobile">
-           <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
-                <backlash-calibration-panel></backlash-calibration-panel>
-            </v-col>
-        </v-row>
-        
-        <v-row v-else-if="isTablet">
-            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
-                <backlash-calibration-panel></backlash-calibration-panel>
-            </v-col>
-        </v-row>
-
-        <v-row v-else-if="isDesktop">
-            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
-                <backlash-calibration-panel></backlash-calibration-panel>
-            </v-col>
-        </v-row>
-        <v-row v-else-if="isWidescreen">
-            <v-col class="col-12 col-md-12 pb-0 pb-md-3"> 
-                <backlash-calibration-panel></backlash-calibration-panel>
-            </v-col>
-        </v-row>
+    <div class="calibration-page">
+        <!-- Apenas o painel de calibração de backlash -->
+        <backlash-calibration-panel></backlash-calibration-panel>
     </div>
 </template>
 
@@ -36,45 +16,28 @@ import BacklashCalibrationPanel from '@/components/panels/BacklashCalibrationPan
         BacklashCalibrationPanel,
     },
 })
-export default class PageDashboard extends Mixins(DashboardMixin) {
-    get mobileLayout() {
-        return this.$store.getters['gui/getPanels']('mobile', 0, true)
-    }
-
-    get tabletLayout1() {
-        return this.$store.getters['gui/getPanels']('tablet', 1, true)
-    }
-
-    get tabletLayout2() {
-        return this.$store.getters['gui/getPanels']('tablet', 2, true)
-    }
-
-    get desktopLayout1() {
-        return this.$store.getters['gui/getPanels']('desktop', 1, true)
-    }
-
-    get desktopLayout2() {
-        return this.$store.getters['gui/getPanels']('desktop', 2, true)
-    }
-
-    get widescreenLayout1() {
-        return this.$store.getters['gui/getPanels']('widescreen', 1, true)
-    }
-
-    get widescreenLayout2() {
-        return this.$store.getters['gui/getPanels']('widescreen', 2, true)
-    }
-
-    get widescreenLayout3() {
-        return this.$store.getters['gui/getPanels']('widescreen', 3, true)
-    }
-
-    extractPanelName(name: string) {
-        return name.split('_')[0] + '-panel'
-    }
-
-    extractPanelId(name: string) {
-        return name.split('_')[1] ?? null
-    }
+export default class PageCalibration extends Mixins(DashboardMixin) {
+    // Removi todos os getters de layout que podem estar carregando outros painéis
 }
 </script>
+
+<style scoped>
+.calibration-page {
+    padding: 16px;
+}
+
+/* Esconde qualquer painel de controle de movimento que possa aparecer */
+::v-deep .toolhead-control-panel,
+::v-deep .move-to-input,
+::v-deep .movement-controls,
+::v-deep .toolhead-control {
+    display: none !important;
+}
+
+/* Esconde painéis específicos que podem estar sendo carregados automaticamente */
+::v-deep [class*="toolhead"],
+::v-deep [class*="movement"],
+::v-deep [class*="control-panel"]:not(.backlash-calibration-panel) {
+    display: none !important;
+}
+</style>
