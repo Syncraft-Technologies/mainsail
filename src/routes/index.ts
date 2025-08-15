@@ -25,6 +25,7 @@ import {
     mdiAbacus,
 } from '@mdi/js'
 import UpdatePage from '@/components/panels/UpdatePage/UpdatePage.vue'
+import SyncraftCalibration from '@/pages/SyncraftCalibration.vue'
 // import Calibration from '@/components/panels/Calibration/Calibration.vue'
 
 const routes: AppRoute[] = [
@@ -129,7 +130,7 @@ const routes: AppRoute[] = [
         title: 'Calibration',
         path: '/calibration',
         icon: mdiAbacus,
-        component: Calibration,
+        component: SyncraftCalibration,
         alwaysShow: true,
         showInNavi: true,
         position: 90,
