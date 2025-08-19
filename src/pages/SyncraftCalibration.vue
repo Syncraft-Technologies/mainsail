@@ -221,20 +221,29 @@ export default class SyncraftCalibration extends Vue {
   }
 
   // fetch com fallback (ENV → relativo), recusando HTML (index/404)
-  private async fetchMoonraker(path: string, init?: RequestInit) {
-    const p = path.startsWith('/') ? path : `/${path}`
+  // A) fetchMoonraker: adicione no-store e um timestamp automático para GETs
+  private async fetchMoonraker(path: string, init: RequestInit = {}) {
+    const method = (init.method || 'GET').toString().toUpperCase()
+    const p0 = path.startsWith('/') ? path : `/${path}`
+    const p = method === 'GET'
+      ? `${p0}${p0.includes('?') ? '&' : '?'}_ts=${Date.now()}`
+      : p0
+
     const isHtml = (ct: string | null, body: string) =>
       (ct || '').toLowerCase().includes('text/html') ||
       body.trim().toLowerCase().startsWith('<!doctype') ||
       body.trim().startsWith('<html')
 
     let lastErr: any
-    const bases = this.moonrakerBases()
-    console.info('[syncraft] bases para Moonraker:', bases)
-    for (const base of bases) {
+    for (const base of this.moonrakerBases()) {
       const url = base ? `${base}${p}` : p
       try {
-        const r = await fetch(url, init)
+        const r = await fetch(url, {
+          credentials: 'include',
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache', ...(init.headers || {}) },
+          ...init,
+        })
         const t = await r.text()
         if (r.ok && !isHtml(r.headers.get('content-type'), t)) {
           return new Response(t, { status: r.status, headers: r.headers })
@@ -249,16 +258,15 @@ export default class SyncraftCalibration extends Vue {
   }
 
 
+
   // LER via HTTP (download)
   // Troque seu loadMachineJson por este:
+  // B) loadMachineJson: mantenha o ?download=1 (o _ts já será injetado pelo fetchMoonraker)
   async loadMachineJson() {
     try {
       const resp = await this.fetchMoonraker('server/files/config/syncraft-machine.json?download=1')
       const text = await resp.text()
-
-      let json: any
-      try { json = JSON.parse(text) }
-      catch { json = JSON.parse(atob(text)) } // se algum servidor mandar base64
+      const json = (() => { try { return JSON.parse(text) } catch { return JSON.parse(atob(text)) } })()
 
       this.machineJson  = json
       this.jsonPathUsed = 'config/syncraft-machine.json'
@@ -270,8 +278,6 @@ export default class SyncraftCalibration extends Vue {
       this.$emit('notify', { type: 'error', message: 'Falha ao ler config (HTTP). Veja o console para detalhes.' })
     }
   }
-
-
 
   private mapJsonToUI(json: SyncraftMachine) {
     this.printerModel = json.printerModel ?? 'X1'
