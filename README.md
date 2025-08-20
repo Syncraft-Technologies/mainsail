@@ -1,127 +1,173 @@
-<p align="center">
-  <a>
-    <img src="https://raw.githubusercontent.com/mainsail-crew/docs/master/assets/img/logo.png" alt='Mainsail logo' height="152">
-    <h1 align="center">Mainsail</h1>
-  </a>
-</p>
-<p align="center">
-  Makes Klipper more accessible by adding a lightweight, responsive web user interface, centred around an intuitive and consistent design philosophy.
-</p>
-<p align="center">
-    <a aria-label="Downloads" href="https://github.com/mainsail-crew/mainsail/releases">
-      <img src="https://img.shields.io/github/downloads/mainsail-crew/mainsail/total?style=flat-square">
-  </a>
-    <a aria-label="Localization" href="https://docs.mainsail.xyz/development/localization">
-      <img src="https://shields-staging.herokuapp.com/github/directory-file-count/mainsail-crew/mainsail/src%2Flocales?label=localizations&extension=json&type=file&style=flat-square">
-  </a>
-    <a aria-label="Stars" href="https://github.com/mainsail-crew/mainsail/stargazers">
-      <img src="https://img.shields.io/github/stars/mainsail-crew/mainsail?style=flat-square">
-  </a>
-    <a aria-label="Forks" href="https://github.com/mainsail-crew/mainsail/network/members">
-      <img src="https://img.shields.io/github/forks/mainsail-crew/mainsail?style=flat-square">
-  </a>
-    <a aria-label="License" href="https://github.com/mainsail-crew/mainsail/blob/develop/LICENSE">
-      <img src="https://img.shields.io/github/license/mainsail-crew/mainsail?style=flat-square">
-  </a>
-    <a aria-label="Last commit" href="https://github.com/mainsail-crew/mainsail/commits/">
-      <img src="https://img.shields.io/github/last-commit/meteyou/mainsail?style=flat-square">
-  </a>
-<br />
-    <a aria-label="Size" href="https://github.com/mainsail-crew/mainsail/">
-      <img src="https://img.shields.io/github/repo-size/meteyou/mainsail?style=flat-square">
-  </a>
-    <a aria-label="Discord" href="https://discord.gg/skWTwTD">
-      <img src="https://img.shields.io/discord/758059413700345988?color=%235865F2&label=discord&logo=discord&logoColor=white&style=flat-square">
-  </a>
-    <a aria-label="Patreon" href="https://www.patreon.com/meteyou">
-      <img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Dmeteyou%26type%3Dpatrons&style=flat-square">
-  </a>
-</p>
+# Mainsail (Fork Syncraft) — Guia de Dev, Build e Instalação
 
-## Getting Started
+Frontend do **Mainsail** com telas customizadas da Syncraft (ex.: **Configuração/Calibração** que lê/escreve o JSON e aciona **systemd** via **Moonraker**).
 
-Visit [docs.mainsail.xyz/setup](https://docs.mainsail.xyz/setup) to get started with Mainsail.
+## Sumário
 
-Mainsail is also available in remote mode on [http://my.mainsail.xyz](http://my.mainsail.xyz). Find
-out [more](https://docs.mainsail.xyz/setup#mymainsailxyz).
+* [Pré-requisitos](#pré-requisitos)
+* [Configuração do Moonraker (uma vez)](#configuração-do-moonraker-uma-vez)
+* [Ambiente de desenvolvimento](#ambiente-de-desenvolvimento)
+* [Build de produção](#build-de-produção)
+* [Instalação na impressora (one-liner)](#instalação-na-impressora-one-liner)
+* [Atualização / rollback](#atualização--rollback)
+* [Dicas & solução de problemas](#dicas--solução-de-problemas)
+* [Licença](#licença)
 
-## Documentation
+---
 
-Visit [docs.mainsail.xyz](https://docs.mainsail.xyz) to view the full documentation.  
-You can find the latest release notes [here](https://github.com/mainsail-crew/mainsail/releases).
+## Pré-requisitos
 
-## Screenshots
+* **Node.js LTS ≥ 18**
+* **npm** (ou **pnpm**/**corepack**, opcional)
+* Impressora com **Moonraker** (e **Nginx** servindo `~/mainsail`)
+* Na impressora: `curl`, `unzip` instalados
 
-![screenshot-dashboard](https://raw.githubusercontent.com/mainsail-crew/docs/master/assets/img/screenshot.png)
-![Features](https://raw.githubusercontent.com/mainsail-crew/docs/master/assets/img/features.png)
+  ```bash
+  sudo apt update && sudo apt install -y curl unzip
+  ```
 
-## Features
+---
 
-- **Responsive Web Interface:** _Optimized for desktops, tablets and mobile devices_
-- **Printer Farm:** _Supports multiple 3D printers_
-- **[Localization](https://docs.mainsail.xyz/features/localization):** _Choose between 12 different languages_
-- **File Manager:** _Delete, rename and upload your G-Code and config files_
-- **File Editor:** _Edit G-Code and config files with syntax highlighting in your browser_
-- **[Print History](https://docs.mainsail.xyz/features/history):** _See your previous prints and their status_
-- **[Statistics](https://docs.mainsail.xyz/features/history):** _View how much time your printer has been in use and the number of jobs that have succeeded or failed_
-- **Job Queue:** _Queue multiple jobs and add them directly from your slicer_
-- **[Temperature Presets](https://docs.mainsail.xyz/features/presets):** _Manage different temperature presets for easy preheating_
-- **[Bed Mesh Visualisation](https://docs.mainsail.xyz/features/bedmesh):** _View your bed using a 3D mesh graph_
-- **G-Code Viewer:** _View a 3D render of your print and follow the progress_
-- **Multi-Webcam Support:** _View your print from different angles with multiple webcams_
-- **Timelapse Integration:** _Automatically record a timelapse of your print using [moonraker-timelapse](https://github.com/mainsail-crew/moonraker-timelapse)_
-- **Power Control:** _Control power devices such as relays, TP-Link and Tasmota devices, and more_
-- **Powerful Macro-Management:** _Manage your macros on a micro level_
-- **[Configurable Dashboard](https://docs.mainsail.xyz/features/dashboard-organisation):** _Create your own personal dashboard_
-- **[Theming Support](https://docs.mainsail.xyz/features/theming):** _Customizable user interface including logos, backgrounds, and custom CSS_
-- **[Additional Sensors](https://docs.mainsail.xyz/quicktips/additional-sensors):** _Add extra sensors to the temperature graph_
-- **Exclude Objects:** _Exclude parts of your print <sup>(not officially supported by Klipper yet)</sup>_
+## Configuração do Moonraker (uma vez)
 
-## Help and Support
+Necessária para que a página consiga **parar/reiniciar serviços** via API:
 
-Do you need help or just want to talk? Join our active community on [Discord](https://discord.gg/skWTwTD)!
+1. `moonraker.conf`
 
-Did you find a bug or did you thought of a feature?
-Please create an [Issue](https://github.com/mainsail-crew/mainsail/issues) in GitHub and let us know.
+   ```ini
+   [machine]
+   provider: systemd_dbus    # (recomendado) ou systemd_cli
+   ```
+2. Regras do PolicyKit (DBus):
 
-## Official Sponsors
+   ```bash
+   cd ~/moonraker
+   ./scripts/set-policykit-rules.sh
+   ```
+3. `~/printer_data/moonraker.asvc` (um serviço por linha, **sem** “.service”):
 
-<p align='center'>
-    <img src="https://raw.githubusercontent.com/mainsail-crew/docs/master/assets/img/logo-bigtreetech.png" alt='Mainsail logo' width="150">
-</p>
+   ```
+   klipper_mcu
+   webcamd
+   MoonCord
+   KlipperScreen
+   crowsnest
+   syncraft-usb
+   syncraft-backlash-watcher
+   ```
+4. Se for desenvolver via Vite (`:5173`), autorize CORS/trusted clients em `moonraker.conf`:
 
-**BIGTREETECH** is the official mainboard partner of Mainsail. BIGTREETECH is committed to developing innovative and competitive products to better serve the 3D printing community.
+   ```ini
+   [authorization]
+   cors_domains:
+       http://localhost:5173
+       http://127.0.0.1:5173
+       http://<seu-ip-lan>:5173
+   trusted_clients:
+       127.0.0.1
+       192.168.0.0/16
+       10.0.0.0/8
+   ```
+5. Reinicie o Moonraker:
 
-## Support Mainsail
+   ```bash
+   sudo systemctl restart moonraker
+   ```
 
-Mainsail is primarily developed and maintained by meteyou. To keep the project going he invests his free time, almost
-every day. To motivate him (☕🍺😜) there are several ways to support him:
+---
 
-[![patreon](https://img.shields.io/badge/patreon-participate-yellow.svg?style=flat-square)](https://www.patreon.com/meteyou)
-[![kofi](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=flat-square)](https://ko-fi.com/mainsail)
+## Ambiente de desenvolvimento
 
-## Contributing
+1. **Instalar dependências**
 
-Contributions to Mainsail are always welcome!
+   ```bash
+   npm ci   # ou: npm install
+   ```
 
-- 📥 Pull requests and 🌟 Stars are always welcome.
-- Read our [contributing guidelines](CONTRIBUTING.md) to get started,
-  or find us on [Discord](https://discord.gg/mainsail), we will take the time to guide you.
+   > Se preferir **pnpm**: `corepack enable && corepack prepare pnpm@latest --activate && pnpm i`
 
-Looking for a first issue to tackle?
+2. **Vars de ambiente (opcional)**
+   Crie `.env` na raiz se quiser apontar explicitamente para o Moonraker:
 
-- We tag issues with [![Good First Issue](https://img.shields.io/github/issues/mainsail-crew/mainsail/good%20first%20issue.svg)](https://github.com/mainsail-crew/mainsail/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) when we think they are well suited for people who are new to the codebase or OSS in general.
-- [Talk to us](https://discord.gg/mainsail), we'll find something that suits your skills and learning interest.
+   ```env
+   VITE_MOONRAKER_URL=http://<IP-DA-IMPRESSORA>:7125
+   VITE_SERVICE_NAME=syncraft-backlash-watcher   # sem ".service"
+   ```
 
-## Credit, sources and inspiration
+3. **Rodar em dev (HMR)**
 
-- [Kevin O'Connor](https://github.com/KevinOConnor) for the awesome 3D printer firmware [Klipper](https://github.com/KevinOConnor/klipper)
-- [Eric Callahan (arksine)](https://github.com/Arksine) for [Moonraker (Klipper API)](https://github.com/Arksine/moonraker). Without Moonraker, Mainsail would not be possible.
-- [lixxbox](https://github.com/lixxbox) for the Mainsail logo & Docs
-- [Vue.js](https://vuejs.org/): The Progressive JavaScript Framework
-- [Vuetify](https://vuetifyjs.com/): Material Design Component Framework for Vue.js
+   ```bash
+   npm run dev
+   ```
 
-Massive thanks to the whole [Voron Design](http://vorondesign.com/) community. Without them such a project would not be
-possible.
+   Acesse: `http://<seu-ip>:5173`
 
-[Full Credits & License information](https://docs.mainsail.xyz/credits)
+   > Se desenvolver a partir de outra máquina, confira as entradas de `authorization` no Moonraker (CORS/Trusted).
+
+---
+
+## Build de produção
+
+Gera a pasta `dist/` com os arquivos estáticos prontos para publicar em `~/mainsail`.
+
+```bash
+npm run build
+```
+
+> Opcional (gerar zip local, se tiver `zip` instalado):
+>
+> ```bash
+> mkdir -p releases
+> (cd dist && zip -qr9 ../releases/mainsail.zip . -x '**/.DS_Store')
+> ```
+
+Após o build, você pode **publicar** a pasta `dist/` manualmente (rsync/SSH) ou usar a **instalação one-liner** abaixo, que baixa um `.zip` do seu repositório e instala diretamente na impressora.
+
+---
+
+## Instalação na impressora (one-liner)
+
+Este comando **baixa** o zip do GitHub, **limpa** `~/mainsail` e **descompacta** o build dentro dela.
+
+> Pré-requisitos na impressora: `curl` e `unzip`.
+
+```bash
+ZIP_URL="https://github.com/Syncraft-Technologies/mainsail/blob/develop/dist/mainsail.zip"; TARGET="$HOME/mainsail"; RAW_URL=$(sed -E 's#https://github\.com/([^/]+)/([^/]+)/blob/([^/]+)/#https://raw.githubusercontent.com/\1/\2/\3/#' <<< "$ZIP_URL"); TMP=$(mktemp -d) && curl -fL --retry 3 -o "$TMP/mainsail.zip" "$RAW_URL" && unzip -tqq "$TMP/mainsail.zip" && mkdir -p "$TARGET" && find "$TARGET" -mindepth 1 -maxdepth 1 -exec rm -rf {} + && unzip -q "$TMP/mainsail.zip" -d "$TARGET" && rm -rf "$TMP"
+```
+
+* Altere `ZIP_URL` se publicar seu zip em outro branch/URL.
+* O conteúdo do zip é extraído **dentro** de `~/mainsail`.
+
+---
+
+## Atualização / rollback
+
+* **Atualizar**: gere um novo `mainsail.zip` e rode o **one-liner** novamente.
+* **Rollback**: mantenha um zip anterior e reaplique o one-liner apontando para a URL do build anterior.
+
+> Se usar Nginx com cache agressivo ou PWA, force refresh (Ctrl+F5) ou limpe cache do navegador ao trocar versões.
+
+---
+
+## Dicas & solução de problemas
+
+* **`zip: not found` ao gerar zip local**: instale `zip` (`sudo apt install -y zip`) ou use uma solução Node-only (ex.: `bestzip`).
+* **Erro CORS/401 no dev**: ajuste `[authorization]` do Moonraker (CORS/Trusted) para a origem `:5173`.
+* **Serviço não reinicia via UI**:
+
+  * Confira `provider` (`systemd_dbus` recomendado);
+  * Execute `./scripts/set-policykit-rules.sh`;
+  * Verifique se o serviço está em `moonraker.asvc` **sem** “.service”;
+  * Veja logs:
+
+    ```bash
+    sudo journalctl -u moonraker -f
+    sudo journalctl -u syncraft-backlash-watcher.service -f
+    ```
+* **Conteúdo não atualiza**: limpe cache do navegador (PWA) ou recarregue o Nginx: `sudo systemctl reload nginx`.
+
+---
+
+## Licença
+
+Este fork segue a licença do repositório. Veja `LICENSE.md`.
