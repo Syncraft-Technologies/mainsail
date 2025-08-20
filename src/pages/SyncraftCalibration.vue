@@ -9,13 +9,9 @@
               <strong>Modelo detectado:</strong>
               <span v-if="printerModel">{{ printerModel }}</span>
               <span v-else>—</span>
-              <span v-if="jsonPathUsed" class="ml-3">
-                <strong>Arquivo:</strong> {{ jsonPathUsed }}
-              </span>
             </div>
             <div class="mt-2 mt-sm-0">
-              <v-btn x-small class="mr-2" @click="loadMachineJson">Recarregar</v-btn>
-              <v-btn x-small :disabled="!dirty" @click="revertChanges">Descartar alterações</v-btn>
+              <v-btn x-small class="mr-2" :loading="busy" @click="loadMachineJson">Recarregar</v-btn>
             </div>
           </div>
         </v-alert>
@@ -24,7 +20,7 @@
 
     <!-- Painel X1 -->
     <v-row v-if="modelKind === 'X1'">
-      <v-col cols="12" sm="12" md="8" lg="7" class="mx-auto">
+      <v-col cols="12">
         <v-card elevation="2">
           <v-card-title class="text-h6">Compensação — X1 (Extrusor Único)</v-card-title>
           <v-card-text>
@@ -51,7 +47,7 @@
 
     <!-- Painel IDEX -->
     <v-row v-else-if="modelKind === 'IDEX'">
-      <v-col cols="12" sm="12" md="10" lg="9" class="mx-auto">
+      <v-col cols="12">
         <v-card elevation="2">
           <v-card-title class="text-h6">Compensação — IDEX (E0 / E1)</v-card-title>
           <v-card-text>
@@ -95,7 +91,7 @@
 
     <!-- Se modelo não reconhecido -->
     <v-row v-else>
-      <v-col cols="12" md="8" class="mx-auto">
+      <v-col cols="12">
         <v-alert type="warning" outlined>
           Modelo de impressora não reconhecido no JSON. Valor atual: <strong>{{ printerModel || 'indefinido' }}</strong>.
         </v-alert>
@@ -108,13 +104,12 @@
         <v-card elevation="2">
           <v-card-title class="text-h6">Ações</v-card-title>
           <v-card-text>
-            <v-alert dense text type="info" class="mb-4">
-              Salvar sempre grava no JSON e reinicia o serviço na impressora.
-            </v-alert>
             <div class="btn-wrap">
-              <v-btn class="mr-2 mb-2" @click="resetAndRestart">Zerar parâmetros e reiniciar</v-btn>
-              <v-btn color="primary" class="mb-2" :disabled="!canSave" @click="saveAndRestart">
-                Salvar parâmetros e reiniciar
+              <v-btn class="mr-2 mb-2" :loading="busy" :disabled="busy" @click="stopAndZero">
+                Parar serviço e zerar parâmetros
+              </v-btn>
+              <v-btn color="blue-darken-3" class="mb-2" :loading="busy" :disabled="!canSave || busy" @click="saveAndRestart">
+                Salvar parâmetros e reiniciar serviço
               </v-btn>
             </div>
           </v-card-text>
@@ -125,8 +120,7 @@
 </template>
 
 <script lang="ts">
-import Component from 'vue-class-component'
-import { Vue } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 
 type ModelKind = 'X1' | 'IDEX' | 'UNKNOWN'
 interface AxisPair { compX: number; compY: number }
@@ -143,8 +137,8 @@ interface SyncraftMachine {
 export default class SyncraftCalibration extends Vue {
   // estado da UI
   printerModel: string | null = null
-  jsonPathUsed: string | null = null
   dirty = false
+  busy = false
 
   // edição
   x1: AxisPair = { compX: 0, compY: 0 }
@@ -156,72 +150,39 @@ export default class SyncraftCalibration extends Vue {
   // cache do json
   machineJson: SyncraftMachine | null = null
 
-  // candidatos de caminho (tenta na ordem)
-  private candidates = [
-    '~/syncraft-machine.json',
-    'home/syncraft-machine.json',
-    'config/syncraft-machine.json',
-    'printer_data/config/syncraft-machine.json',
-  ]
-
   async mounted() { await this.loadMachineJson() }
 
   // computed
   get modelKind(): ModelKind {
-    const p = (this.printerModel || '').toUpperCase()
+    const p = (this.printerModel || '').toUpperCase().trim()
     if (p === 'X1') return 'X1'
-    if (p.includes('IDEX') || p.includes('SYNC')) return 'IDEX'
+    if (p.includes('IDEX')) return 'IDEX'
     return 'UNKNOWN'
   }
   get canSave() { return !!this.machineJson }
 
-  // —— carga/salvamento ————————————————————————
-  private extractContent(rpcRes: any): string {
-    if (rpcRes == null) return ''
-    if (typeof rpcRes === 'string') return rpcRes
-    const cands = [
-      rpcRes?.result?.content,
-      rpcRes?.result?.contents,
-      rpcRes?.content,
-      rpcRes?.contents,
-      rpcRes?.data,
-      typeof rpcRes?.result === 'string' ? rpcRes.result : undefined,
-    ]
-    for (const c of cands) if (typeof c === 'string' && c.length) return c
-    return ''
-  }
-
-  private tryParseJson(s: string): SyncraftMachine | null {
-    try { return JSON.parse(s) } catch {
-      try { return JSON.parse(atob(s)) } catch { return null }
-    }
-  }
-
-  // Lê variáveis em Vite (VITE_*) e Vue CLI (VUE_APP_*)
+  // ===== Helpers de ambiente =====
   private readEnv(name: string): string | undefined {
     let meta: any; try { meta = (import.meta as any)?.env } catch {}
     const penv: any = (typeof process !== 'undefined' && (process as any)?.env) ? (process as any).env : undefined
     return (meta && meta[name] !== undefined) ? meta[name] : (penv ? penv[name] : undefined)
   }
 
-  // Bases: ENV explícita → relativo (se proxy existir)
+  // ===== Base URL do Moonraker =====
   private moonrakerBases(): string[] {
-    // Dê preferência a uma URL completa (mais simples)
     const full = this.readEnv('VITE_MOONRAKER_URL') || this.readEnv('VUE_APP_MOONRAKER_URL')
     const host = this.readEnv('VUE_APP_HOSTNAME') || this.readEnv('VITE_MOONRAKER_HOST')
     const port = this.readEnv('VUE_APP_PORT')      || this.readEnv('VITE_MOONRAKER_PORT') || '7125'
     const path = (this.readEnv('VUE_APP_PATH')     || this.readEnv('VITE_MOONRAKER_PATH') || '/').replace(/\/+$/,'')
-
     const bases: string[] = []
     if (full) bases.push(full.replace(/\/+$/, ''))
     else if (host) bases.push(`http://${host}${port ? ':' + port : ''}${path}`)
-    // relativa por último (só funciona se o Nginx proxyar /server)
+    // relativa por último (proxy de /server habilitado)
     bases.push('')
     return bases
   }
 
-  // fetch com fallback (ENV → relativo), recusando HTML (index/404)
-  // A) fetchMoonraker: adicione no-store e um timestamp automático para GETs
+  // ===== fetch com fallback e cache-busting =====
   private async fetchMoonraker(path: string, init: RequestInit = {}) {
     const method = (init.method || 'GET').toString().toUpperCase()
     const p0 = path.startsWith('/') ? path : `/${path}`
@@ -257,56 +218,85 @@ export default class SyncraftCalibration extends Vue {
     throw lastErr || new Error('Falha no fetchMoonraker')
   }
 
+  // ===== Nome do serviço (sem .service) =====
+  private serviceId(): string {
+    const raw = this.readEnv('VITE_SERVICE_NAME') || 'syncraft-backlash-watcher'
+    return raw.replace(/\.service$/i, '')
+  }
 
+  // ===== Chamada de ação de serviço no Moonraker =====
+  private async postServiceAction(action: 'restart' | 'stop') {
+    const body = JSON.stringify({ service: this.serviceId() })
+    const res = await this.fetchMoonraker(`machine/services/${action}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body
+    })
+    if (!res.ok) {
+      let info = ''
+      try { info = await res.text() } catch {}
+      throw new Error(`${action} failed ${info ? `: ${info}` : ''}`)
+    }
+  }
 
-  // LER via HTTP (download)
-  // Troque seu loadMachineJson por este:
-  // B) loadMachineJson: mantenha o ?download=1 (o _ts já será injetado pelo fetchMoonraker)
+  // ===== Carga/Salvamento do JSON =====
   async loadMachineJson() {
     try {
+      this.busy = true
       const resp = await this.fetchMoonraker('server/files/config/syncraft-machine.json?download=1')
       const text = await resp.text()
-      const json = (() => { try { return JSON.parse(text) } catch { return JSON.parse(atob(text)) } })()
+      let json: SyncraftMachine
+      try { json = JSON.parse(text) } catch { json = JSON.parse(atob(text)) }
 
       this.machineJson  = json
-      this.jsonPathUsed = 'config/syncraft-machine.json'
       this.mapJsonToUI(json)
       this.dirty = false
-      this.$emit('notify', { type: 'success', message: 'Config carregada (config/syncraft-machine.json).' })
+      this.$emit('notify', { type: 'success', message: 'Config carregada.' })
     } catch (e) {
       console.error('[syncraft] loadMachineJson', e)
       this.$emit('notify', { type: 'error', message: 'Falha ao ler config (HTTP). Veja o console para detalhes.' })
+    } finally {
+      this.busy = false
     }
   }
 
   private mapJsonToUI(json: SyncraftMachine) {
     this.printerModel = json.printerModel ?? 'X1'
-    // preencher X1 a partir de E0
-    this.x1.compX = Number(json.bc_x0 ?? 0) || 0
-    this.x1.compY = Number(json.bc_y0 ?? 0) || 0
-    // preencher IDEX
-    this.idex.e0.compX = Number(json.bc_x0 ?? 0) || 0
-    this.idex.e0.compY = Number(json.bc_y0 ?? 0) || 0
-    this.idex.e1.compX = Number(json.bc_x1 ?? 0) || 0
-    this.idex.e1.compY = Number(json.bc_y1 ?? 0) || 0
+    const e0x = Number(json.bc_x0 ?? 0) || 0
+    const e0y = Number(json.bc_y0 ?? 0) || 0
+    const e1x = Number(json.bc_x1 ?? e0x) || 0
+    const e1y = Number(json.bc_y1 ?? e0y) || 0
+
+    this.x1.compX = e0x
+    this.x1.compY = e0y
+
+    this.idex.e0.compX = e0x
+    this.idex.e0.compY = e0y
+    this.idex.e1.compX = e1x
+    this.idex.e1.compY = e1y
   }
 
   private mapUIToJson(): SyncraftMachine {
-    const base = { ...(this.machineJson || {}) }
+    const base: SyncraftMachine = { ...(this.machineJson || {}) }
     base.printerModel = this.printerModel || 'X1'
-    // sempre persistimos os 4 campos (E0/E1)
-    base.bc_x0 = Number(this.idex.e0.compX) || 0
-    base.bc_y0 = Number(this.idex.e0.compY) || 0
-    base.bc_x1 = Number(this.idex.e1.compX) || 0
-    base.bc_y1 = Number(this.idex.e1.compY) || 0
+
+    if (this.modelKind === 'X1') {
+      const x = Number(this.x1.compX) || 0
+      const y = Number(this.x1.compY) || 0
+      base.bc_x0 = x; base.bc_y0 = y
+      base.bc_x1 = x; base.bc_y1 = y
+    } else {
+      base.bc_x0 = Number(this.idex.e0.compX) || 0
+      base.bc_y0 = Number(this.idex.e0.compY) || 0
+      base.bc_x1 = Number(this.idex.e1.compX) || 0
+      base.bc_y1 = Number(this.idex.e1.compY) || 0
+    }
     return base
   }
 
-  
-
-  // SALVAR via HTTP (upload) — sobrescreve arquivo em config/
   async saveJson() {
     try {
+      this.busy = true
       const json = this.mapUIToJson()
       const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' })
       const form = new FormData()
@@ -321,59 +311,62 @@ export default class SyncraftCalibration extends Vue {
       }
 
       this.machineJson  = json
-      this.jsonPathUsed = 'config/syncraft-machine.json'
       this.dirty = false
-      this.$emit('notify', { type: 'success', message: 'Config salva (config/syncraft-machine.json).' })
+      this.$emit('notify', { type: 'success', message: 'Config salva.' })
     } catch (e) {
       console.error('[syncraft] saveJson', e)
       this.$emit('notify', { type: 'error', message: 'Falha ao salvar config (HTTP). Veja o console para detalhes.' })
+    } finally {
+      this.busy = false
     }
   }
 
+  // ===== Ações =====
+  async stopService() {
+    await this.postServiceAction('stop')
+  }
 
-
-  // —— ações ————————————————————————————————
-  async resetAndRestart() {
-    // zera tudo na UI
-    this.x1.compX = this.x1.compY = 0
-    this.idex.e0.compX = this.idex.e0.compY = 0
-    this.idex.e1.compX = this.idex.e1.compY = 0
-    this.dirty = true
-
-    // grava zeros no JSON e reinicia serviço
-    await this.saveJson()
-    await this.restartService()
+  async stopAndZero() {
+    this.busy = true
+    try {
+      // 1) Parar serviço
+      await this.stopService()
+      // 2) Zerar UI
+      this.x1.compX = this.x1.compY = 0
+      this.idex.e0.compX = this.idex.e0.compY = 0
+      this.idex.e1.compX = this.idex.e1.compY = 0
+      this.dirty = true
+      // 3) Salvar JSON zerado
+      await this.saveJson()
+      this.$emit('notify', { type: 'success', message: 'Serviço parado e parâmetros zerados.' })
+    } catch (e: any) {
+      console.error('[stopAndZero]', e)
+      this.$emit('notify', { type: 'error', message: `Falha ao parar/zerar: ${e?.message || e}` })
+    } finally {
+      this.busy = false
+    }
   }
 
   async saveAndRestart() {
-    await this.saveJson()
-    await this.restartService()
-  }
-
-  revertChanges() {
-    if (this.machineJson) this.mapJsonToUI(this.machineJson)
-    this.dirty = false
-  }
-
-  async restartService() {
+    this.busy = true
     try {
-      // envia G-code para reiniciar Klippy
-      // @ts-ignore
-      await this.$store.dispatch('server/request', {
-        method: 'printer.gcode.script',
-        params: { script: 'RESTART' }
-      })
-      this.$emit('notify', { type: 'success', message: 'Serviço reiniciado.' })
-    } catch {
-      this.$emit('notify', { type: 'error', message: 'Falha ao reiniciar serviço.' })
+      await this.saveJson()
+      await this.postServiceAction('restart')
+      this.$emit('notify', { type: 'success', message: 'Config salva e serviço reiniciado.' })
+    } catch (e: any) {
+      console.error('[saveAndRestart]', e)
+      this.$emit('notify', { type: 'error', message: `Falha ao reiniciar serviço: ${e?.message || e}` })
+    } finally {
+      this.busy = false
     }
   }
 
-  // watchers simples para marcar alteração
-  watch = {
-    x1: { handler: () => (this.dirty = true), deep: true },
-    idex: { handler: () => (this.dirty = true), deep: true },
-  } as any
+  // —— watchers (classe) ——————————————————————
+  @Watch('x1', { deep: true })
+  onX1Changed() { this.dirty = true }
+
+  @Watch('idex', { deep: true })
+  onIdexChanged() { this.dirty = true }
 }
 </script>
 
