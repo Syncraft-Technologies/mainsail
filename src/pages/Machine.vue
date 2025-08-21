@@ -9,11 +9,11 @@
         </v-row>
 
         <v-row>
-            <v-col class="col-12 col-md-6 pt-0 pt-md-3">             
+            <!-- <v-col class="col-12 col-md-6 pt-0 pt-md-3">             
                 <config-files-panel></config-files-panel>
-            </v-col>
-            <v-col :class="klipperState !== 'ready' ? 'col-12' : 'col-12 col-sm-6 pt-0 pt-sm-3'">
-                    <logfiles-panel></logfiles-panel>
+            </v-col> -->
+            <v-col :class="klipperState !== 'ready' ? 'col-12' : 'col-12 col-sm-12 pt-0 pt-sm-3'">
+                <logfiles-panel></logfiles-panel>
             </v-col>
         </v-row>
         
